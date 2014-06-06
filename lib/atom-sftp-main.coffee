@@ -9,9 +9,8 @@ class AtomSftpMain
 
   constructor: (serializeState) ->
     #atom.workspaceView.command "atom-sftp:toggle", => @toggle()
-    console.dir atom.workspaceView
     atom.workspaceView[0].addEventListener "contextmenu", => @generateMenu(event)
-    atom.workspaceView[0].addEventListener "click", => @generateMenu(event)
+    #atom.workspaceView[0].addEventListener "click", => @generateMenu(event)
     atom.workspaceView.command "atom-sftp:listRemote", => @listRemote()
 
   # Returns an object that can be retrieved when package is activated
@@ -25,8 +24,6 @@ class AtomSftpMain
     console.log "test"
 
   generateMenu: (event) ->
-    console.dir event
-    target = event.target
 
 
     #remove any present package menus
@@ -41,6 +38,65 @@ class AtomSftpMain
 
     #check if config file exists and add menu based on that
     hasConfig = true
+
+    target = event.target
+    #console.dir target
+
+    foundParent = false
+    noParent = false
+    type = null
+    while !foundParent && !noParent
+      if ((" " + target.className + " ").replace(/[\n\t]/g, " ").indexOf ' editor ') > -1
+        foundParent = true
+        type = 'editor'
+      else if ((" " + target.className + " ").replace(/[\n\t]/g, " ").indexOf ' list-item ') > -1
+        foundParent = true
+        type = 'list-item'
+      else if ((" " + target.className + " ").replace(/[\n\t]/g, " ").indexOf ' tree-view ') > -1
+        foundParent = true
+        type = 'tree-view'
+      else if !target.parentElement? || target.parentElement is ''
+        noParent = true
+      else
+        target = target.parentElement
+
+    if noParent
+      return
+
+    file = null
+    if type is 'editor'
+      editor = atom.workspace.getActivePane().getActiveItem()
+      file = editor.buffer.file.path
+      file = atom.project.relativize file
+    else if type is 'list-item'
+      file = target.querySelector('.name').getAttribute 'data-path'
+      file = atom.project.relativize file
+    else
+      file = ''
+
+    projectDir = atom.project.getRootDirectory()
+    dir = atom.project.getRootDirectory().getSubdirectory(file)
+
+    if dir.isFile()
+      dir = dir.getParent()
+
+    confFile = null
+    isRoot = false
+
+    while !confFile && !isRoot
+      entries = dir.getEntriesSync()
+      for entry in entries
+        if entry.isFile() && entry.getBaseName() is 'atom-sftp.config.cson'
+          confFile = entry
+      if dir.getPath() is projectDir.getPath()
+        isRoot = true
+      else
+        dir = dir.getParent()
+
+    console.dir confFile
+
+    #console.dir dir
+    #console.dir dir.isFile()
 
 
 
