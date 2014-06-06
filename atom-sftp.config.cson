@@ -1,0 +1,9 @@
+'atom-ssh':
+  'protocol': 'ftp' #ftp or sftp
+  'host': 'ftp.mozilla.org'
+  'port': 21
+  'username': 'anonymous'
+  'password': '@anonymous'
+
+  'localPath': '/' #realtive to Project root
+  'remotePath': 'pub/mozilla.org/' #relative to Server root
