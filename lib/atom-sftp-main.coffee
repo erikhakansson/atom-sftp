@@ -2,7 +2,7 @@ coffee = require 'coffee-script'
 fsUtil = require 'fs'
 Path = require 'path'
 FtpHandler = require './FtpHandler'
-
+RemoteListView = require './RemoteListView'
 
 module.exports =
 class AtomSftpMain
@@ -10,11 +10,13 @@ class AtomSftpMain
   confFile: null
   targetFile: null
   ftpHandler: null
+  remoteListView: null
 
   constructor: (serializeState) ->
     atom.workspaceView[0].addEventListener "contextmenu", => @generateMenu(event)
     atom.workspaceView.command "atom-sftp:listRemote", => @listRemote()
     @ftpHandler = new FtpHandler()
+    @remoteListView = new RemoteListView()
 
   # Returns an object that can be retrieved when package is activated
   serialize: ->
@@ -24,6 +26,8 @@ class AtomSftpMain
     @detach()
 
   listRemote: ->
+    console.dir @remoteListView
+    #@remoteListView.attach()
     if @confFile?
       configRaw = fsUtil.readFileSync(@confFile.path).toString()
       config = coffee.eval configRaw, {sandbox: true}
@@ -33,6 +37,7 @@ class AtomSftpMain
           console.dir err
         else
           console.dir result
+
       target = @targetFile
       if fsUtil.statSync(Path.resolve(atom.project.getRootDirectory().getPath(), target)).isFile()
         target = Path.dirname(target)
