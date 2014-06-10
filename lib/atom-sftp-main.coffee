@@ -26,17 +26,24 @@ class AtomSftpMain
     @detach()
 
   listRemote: ->
-    console.dir @remoteListView
-    #@remoteListView.attach()
+    @remoteListView.attach()
     if @confFile?
       configRaw = fsUtil.readFileSync(@confFile.path).toString()
       config = coffee.eval configRaw, {sandbox: true}
       @ftpHandler.setOptions config['atom-ssh']
-      callback = (err, result) ->
+      callback = (err, result, remotePath) ->
         if err?
           console.dir err
         else
-          console.dir result
+          if remotePath isnt ''
+            #@todo do stuff
+          for object in result
+            console.dir object
+            if object.type is 0
+              
+            else if object.type is 1
+              type = 'dir'
+
 
       target = @targetFile
       if fsUtil.statSync(Path.resolve(atom.project.getRootDirectory().getPath(), target)).isFile()

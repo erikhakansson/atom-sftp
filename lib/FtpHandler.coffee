@@ -32,11 +32,13 @@ class AtomSftpMain
       }
 
   list: (path, callback) ->
+    origPath = path
     if !path?
       path = '/'
     else
       path = Path.join(@options.remotePath, path)
-      console.dir path
     @connect()
     if @options.protocol is 'ftp'
-      @ftp.list path, callback
+      internalCallback = (err, res) ->
+        callback err, res, origPath
+      @ftp.ls path, internalCallback
