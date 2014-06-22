@@ -9,13 +9,17 @@ class AtomSftpMain
   pkgName: "Atom-sFTP"
   confFile: null
   targetFile: null
-  ftpHandler: null
+  #ftpHandler: null
   remoteListView: null
 
   constructor: (serializeState) ->
     atom.workspaceView[0].addEventListener "contextmenu", => @generateMenu(event)
     atom.workspaceView.command "atom-sftp:listRemote", => @listRemote()
-    @ftpHandler = new FtpHandler()
+
+    atom.sftp = {}
+    atom.sftp.ftpHandler = new FtpHandler()
+
+    #@ftpHandler = new FtpHandler()
     @remoteListView = new RemoteListView()
 
   # Returns an object that can be retrieved when package is activated
@@ -26,29 +30,28 @@ class AtomSftpMain
     @detach()
 
   listRemote: ->
-    @remoteListView.attach()
+    remoteListView = @remoteListView
+    remoteListView.attach()
     if @confFile?
       configRaw = fsUtil.readFileSync(@confFile.path).toString()
       config = coffee.eval configRaw, {sandbox: true}
-      @ftpHandler.setOptions config['atom-ssh']
+      atom.sftp.ftpHandler.setOptions config['atom-ssh']
       callback = (err, result, remotePath) ->
         if err?
           console.dir err
         else
           if remotePath isnt ''
+            console.log 'test'
             #@todo do stuff
           for object in result
-            console.dir object
-            if object.type is 0
-              
-            else if object.type is 1
-              type = 'dir'
+            object.path = remotePath
+            remoteListView.addItem object
 
 
       target = @targetFile
       if fsUtil.statSync(Path.resolve(atom.project.getRootDirectory().getPath(), target)).isFile()
         target = Path.dirname(target)
-      @ftpHandler.list target, callback
+      atom.sftp.ftpHandler.list target, callback
       #console.dir config['atom-ssh']
 
   getTargetFile: (target) ->

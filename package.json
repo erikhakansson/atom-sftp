@@ -12,6 +12,9 @@
   "dependencies": {
     "coffee-script": "*",
     "jsftp": "*",
-    "ssh2": "*"
+    "ssh2": "*",
+    "theorist": "*",
+    "underscore-plus": "*",
+    "fs-plus": "*"
   }
 }
